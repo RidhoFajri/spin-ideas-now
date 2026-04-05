@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { Lever } from "./Lever";
+import { playSlotTick, playSlotWin } from "@/lib/sounds";
 
 interface SlotMachineProps {
   topics: string[];
@@ -30,7 +31,6 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
     setSpinning(true);
     setSelectedTopic(null);
 
-    // Fast spin phase
     let speed = 50;
     let count = 0;
     const totalFastSpins = 30 + Math.floor(Math.random() * 20);
@@ -38,11 +38,11 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
 
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % topics.length);
+      playSlotTick();
       count++;
 
       if (count >= totalFastSpins) {
         clearInterval(intervalRef.current!);
-        // Slow down phase
         let slowCount = 0;
         const slowSpins = 8 + Math.floor(Math.random() * 5);
         let currentSlow = (count % topics.length);
@@ -52,15 +52,15 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
           speed = 50 + slowCount * 80;
           currentSlow = (currentSlow + 1) % topics.length;
           setCurrentIndex(currentSlow);
+          playSlotTick();
 
           if (slowCount >= slowSpins) {
-            // Final landing
             setCurrentIndex(finalIndex);
             setSelectedTopic(topics[finalIndex]);
             setSpinning(false);
             onTopicSelected(topics[finalIndex]);
+            playSlotWin();
 
-            // Confetti!
             confetti({
               particleCount: 100,
               spread: 70,
@@ -82,29 +82,22 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
 
   return (
     <div className="flex items-center gap-4 md:gap-6">
-      {/* Machine Body */}
       <div className="flex-1 max-w-xl">
-        {/* Top Banner */}
         <div className="gold-gradient rounded-t-2xl px-6 py-3 text-center">
           <h2 className="font-display text-xs md:text-sm text-primary-foreground tracking-wider">
             🎰 TOPIC SPINNER 🎰
           </h2>
         </div>
 
-        {/* Slot Window */}
         <div className="metal-gradient border-x-4 border-gold/30 px-4 md:px-8 py-6 md:py-10">
           <div className="relative bg-background rounded-xl overflow-hidden slot-inner-shadow border-2 border-gold/20">
-            {/* Scan lines overlay */}
             <div className="absolute inset-0 pointer-events-none opacity-5"
               style={{
                 backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)",
               }}
             />
-
-            {/* Center indicator lines */}
             <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-16 md:h-20 border-y-2 border-gold/40 pointer-events-none z-10" />
 
-            {/* Topic Display */}
             <div className="h-32 md:h-40 flex items-center justify-center px-4 md:px-8">
               {isLoading ? (
                 <div className="flex flex-col items-center gap-3">
@@ -135,7 +128,6 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
           </div>
         </div>
 
-        {/* Bottom Panel */}
         <div className="gold-gradient rounded-b-2xl px-6 py-2 flex items-center justify-center gap-2">
           {[...Array(5)].map((_, i) => (
             <motion.div
@@ -155,7 +147,6 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
         </div>
       </div>
 
-      {/* Lever */}
       <Lever onPull={spin} disabled={spinning || isLoading || topics.length === 0} spinning={spinning} />
     </div>
   );
