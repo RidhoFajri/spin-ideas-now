@@ -29,10 +29,12 @@ serve(async (req) => {
 
 ATURAN PENTING:
 - Topik harus RINGAN dan FUN, jangan terlalu berat atau filosofis
+- TAPI topik harus punya kedalaman yang cukup supaya bisa jadi obrolan panjang dan seru, bukan cuma dijawab singkat
+- Buat topik yang open-ended, memancing cerita, sharing pengalaman, atau debat pendapat — bukan yang bisa dijawab ya/tidak
 - Campur berbagai jenis: pengalaman sehari-hari, pop culture, media sosial, kebiasaan generasi sekarang, tren terkini, nostalgia, relatable moments, debat ringan, would you rather, unpopular opinions
 - Selipkan topik yang relate dengan kehidupan anak muda/orang dewasa sekarang (kerja, hustle culture, overthinking, self-care, dating, friendship, quarter-life crisis, dll)
 - Gunakan bahasa santai dan casual
-- Setiap topik harus memancing orang untuk langsung ingin jawab/cerita
+- Setiap topik harus memancing orang untuk langsung ingin jawab/cerita panjang lebar
 
 Contoh tone yang diinginkan:
 - "Apa red flag terbesar yang pernah kamu abaikan?"
