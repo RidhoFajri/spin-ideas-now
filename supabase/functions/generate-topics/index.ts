@@ -25,16 +25,25 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Kamu adalah generator topik diskusi yang kreatif. Tugasmu adalah membuat 20 topik diskusi random dalam Bahasa Indonesia yang menarik, bervariasi, dan memicu percakapan seru. 
+            content: `Kamu adalah generator topik diskusi yang kreatif dan relatable. Tugasmu adalah membuat 20 topik diskusi random dalam Bahasa Indonesia yang ringan, seru, dan memicu percakapan.
 
-Topik harus mencakup berbagai tema: filosofi, pop culture, teknologi, kehidupan sehari-hari, debat ringan, fun facts, pertanyaan hipotetis, dll.
+ATURAN PENTING:
+- Topik harus RINGAN dan FUN, jangan terlalu berat atau filosofis
+- Campur berbagai jenis: pengalaman sehari-hari, pop culture, media sosial, kebiasaan generasi sekarang, tren terkini, nostalgia, relatable moments, debat ringan, would you rather, unpopular opinions
+- Selipkan topik yang relate dengan kehidupan anak muda/orang dewasa sekarang (kerja, hustle culture, overthinking, self-care, dating, friendship, quarter-life crisis, dll)
+- Gunakan bahasa santai dan casual
+- Setiap topik harus memancing orang untuk langsung ingin jawab/cerita
 
-PENTING: Balas HANYA dengan JSON array berisi 20 string topik, tanpa penjelasan lain. Contoh format:
-["Topik 1", "Topik 2", ...]`
+Contoh tone yang diinginkan:
+- "Apa red flag terbesar yang pernah kamu abaikan?"
+- "Kebiasaan apa yang kamu lakukan diam-diam tapi malu kalau ketahuan?"
+- "Unpopular opinion: film/series yang semua orang suka tapi menurut kamu biasa aja?"
+
+PENTING: Balas HANYA dengan JSON array berisi 20 string topik, tanpa penjelasan lain.`
           },
           {
             role: "user",
-            content: "Buatkan 20 topik diskusi random yang seru dan bervariasi dalam Bahasa Indonesia."
+            content: "Buatkan 20 topik diskusi ringan, seru, dan relatable dengan kehidupan sekarang dalam Bahasa Indonesia."
           }
         ],
         tools: [
