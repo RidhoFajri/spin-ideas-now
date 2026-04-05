@@ -1,4 +1,5 @@
-// Fallback topics for when AI is not available
+import { supabase } from "@/integrations/supabase/client";
+
 export const FALLBACK_TOPICS: string[] = [
   "Apakah waktu itu benar-benar ada atau hanya konstruksi manusia?",
   "Kalau bisa makan malam dengan satu tokoh sejarah, siapa dan kenapa?",
@@ -22,10 +23,23 @@ export const FALLBACK_TOPICS: string[] = [
   "Apa hal yang paling ingin kamu pelajari tapi belum sempat?",
 ];
 
-export function generateTopics(): Promise<string[]> {
-  // Shuffle and return fallback topics
-  const shuffled = [...FALLBACK_TOPICS].sort(() => Math.random() - 0.5);
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(shuffled), 1500); // Simulate loading
-  });
+export async function generateTopics(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke("generate-topics");
+    
+    if (error) {
+      console.error("Edge function error:", error);
+      throw error;
+    }
+    
+    if (data?.topics && Array.isArray(data.topics) && data.topics.length > 0) {
+      return data.topics;
+    }
+    
+    throw new Error("Invalid response format");
+  } catch (e) {
+    console.warn("AI generation failed, using fallback topics:", e);
+    const shuffled = [...FALLBACK_TOPICS].sort(() => Math.random() - 0.5);
+    return shuffled;
+  }
 }

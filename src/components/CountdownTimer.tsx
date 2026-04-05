@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, Pause, RotateCcw } from "lucide-react";
+import { playCountdownWarning, playTimerFinished } from "@/lib/sounds";
 
 interface CountdownTimerProps {
   topic: string;
@@ -13,6 +14,7 @@ export function CountdownTimer({ topic }: CountdownTimerProps) {
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastWarningRef = useRef<number>(-1);
 
   const totalSeconds = timeLeft ?? minutes * 60 + seconds;
   const displayMin = Math.floor(totalSeconds / 60);
@@ -33,6 +35,7 @@ export function CountdownTimer({ topic }: CountdownTimerProps) {
     setTimeLeft(total);
     setRunning(true);
     setFinished(false);
+    lastWarningRef.current = -1;
 
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
@@ -40,23 +43,15 @@ export function CountdownTimer({ topic }: CountdownTimerProps) {
           clearTimer();
           setRunning(false);
           setFinished(true);
-          // Play alarm sound
-          try {
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = 800;
-            gain.gain.value = 0.3;
-            osc.start();
-            setTimeout(() => { osc.frequency.value = 1000; }, 200);
-            setTimeout(() => { osc.frequency.value = 800; }, 400);
-            setTimeout(() => { osc.stop(); ctx.close(); }, 600);
-          } catch {}
+          playTimerFinished();
           return 0;
         }
-        return prev - 1;
+        const next = prev - 1;
+        if (next <= 10 && next > 0 && next !== lastWarningRef.current) {
+          lastWarningRef.current = next;
+          playCountdownWarning();
+        }
+        return next;
       });
     }, 1000);
   };
@@ -79,7 +74,7 @@ export function CountdownTimer({ topic }: CountdownTimerProps) {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3 }}
+      transition={{ duration: 0.5 }}
       className="w-full max-w-xl mx-auto"
     >
       {/* Selected Topic */}
@@ -97,7 +92,6 @@ export function CountdownTimer({ topic }: CountdownTimerProps) {
       {/* Timer Display */}
       <div className="bg-card rounded-2xl border border-border p-6 md:p-8 box-gold-glow">
         {!isStarted ? (
-          /* Duration Input */
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="flex flex-col items-center">
               <label className="font-display text-[8px] text-muted-foreground mb-1">MIN</label>
@@ -124,7 +118,6 @@ export function CountdownTimer({ topic }: CountdownTimerProps) {
             </div>
           </div>
         ) : (
-          /* Countdown Display */
           <div className="text-center mb-6">
             <motion.p
               className={`font-body font-black text-6xl md:text-8xl tabular-nums ${
