@@ -25,20 +25,27 @@ export const FALLBACK_TOPICS: string[] = [
 
 export async function generateTopics(): Promise<string[]> {
   try {
+    console.log("🚀 CALLING SUPABASE FUNCTION...");
+
     const { data, error } = await supabase.functions.invoke("generate-topics");
     
+    console.log("🔥 DATA:", data);
+    console.log("🔥 ERROR:", error);
+
     if (error) {
-      console.error("Edge function error:", error);
+      console.error("❌ Edge function error:", error);
       throw error;
     }
     
     if (data?.topics && Array.isArray(data.topics) && data.topics.length > 0) {
+      console.log("✅ AI BERHASIL");
       return data.topics;
     }
     
     throw new Error("Invalid response format");
   } catch (e) {
-    console.warn("AI generation failed, using fallback topics:", e);
+    console.warn("❌ FALLBACK KEPAKAI:", e);
+
     const shuffled = [...FALLBACK_TOPICS].sort(() => Math.random() - 0.5);
     return shuffled;
   }
