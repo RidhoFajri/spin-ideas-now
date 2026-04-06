@@ -17,31 +17,41 @@ serve(async (req) => {
       throw new Error("GEMINI_API_KEY is not configured");
     }
 
-    // 🔥 PROMPT IDE GASS! (UPGRADED)
+    // 🎲 RANDOM BIAR HASIL SELALU BEDA
+    const randomSeed = Math.floor(Math.random() * 100000);
+
+    // 🔥 PROMPT IDE GASS! (SUPER UPGRADE)
     const prompt = `
-Kamu adalah AI bernama "Ide Gass!" — generator ide yang fun, relate, dan bikin orang langsung pengen ikut ngobrol.
+Random seed: ${randomSeed}
+
+Kamu adalah AI bernama "Ide Gass!" dengan kepribadian:
+- random
+- berani
+- sedikit nyeleneh
+- sangat relate sama kehidupan nyata
 
 Tugas:
-Buatkan 20 topik diskusi dalam Bahasa Indonesia.
+Buatkan 20 topik diskusi dalam Bahasa Indonesia yang:
+- bikin orang langsung mikir "anjir ini gue banget"
+- tidak boleh generic atau template
+- terasa seperti pengalaman nyata
 
-STYLE:
-- Santai, Gen Z banget
-- Relatable sama kehidupan sekarang
-- Bikin orang mikir: "anjir ini gue banget"
+ATURAN KHUSUS:
+- Minimal 5 topik agak absurd / unik
+- Minimal 5 topik terasa personal (kayak curhat)
+- Minimal 5 topik bisa memicu debat ringan
+- Gunakan bahasa santai, boleh sedikit sarkas
+- Jangan terlalu rapi, biar terasa natural
 
-ATURAN:
-- HARUS open-ended (bukan ya/tidak)
-- Bisa jadi obrolan panjang
-- Variatif:
-  • pengalaman hidup
-  • overthinking
-  • kerja & quarter-life crisis
-  • hubungan & friendship
-  • kebiasaan random
-  • nostalgia
-  • debat ringan
-  • unpopular opinion
-- Jangan terlalu generic
+HINDARI:
+- "apa hobi kamu"
+- "apa cita-cita kamu"
+- pertanyaan terlalu umum
+
+EXTRA:
+- Buat beberapa topik yang agak sensitif tapi masih aman
+- Gunakan gaya bahasa seperti ngobrol sama teman dekat
+- Boleh sedikit kasar tapi tetap sopan
 
 FORMAT WAJIB:
 Balas HANYA JSON array berisi 20 string
@@ -91,12 +101,12 @@ Tanpa penjelasan tambahan
     } catch (err) {
       console.error("JSON parse error:", rawText);
 
-      // 🔥 FALLBACK (biar gak blank di frontend)
+      // 🔥 FALLBACK (biar gak blank)
       topics = [
         "Hal kecil apa yang akhir-akhir ini bikin kamu overthinking?",
-        "Kebiasaan aneh apa yang kamu lakukan tapi jarang orang tahu?",
+        "Kapan terakhir kali kamu pura-pura baik-baik aja padahal lagi capek banget?",
+        "Kebiasaan aneh apa yang kamu lakukan diam-diam tapi malu kalau ketahuan?",
         "Menurut kamu, kerja 9–5 itu masih relevan nggak sekarang?",
-        "Hal paling random yang pernah kamu lakukan karena gabut?",
         "Apa momen paling 'ini gue banget' dalam hidup kamu?",
       ];
     }
