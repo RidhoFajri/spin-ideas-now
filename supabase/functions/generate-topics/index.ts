@@ -2,25 +2,26 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
+  // 1. Handle preflight CORS request
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const G4F_API_KEY = Deno.env.get("G4F_API_KEY");
-    if (!G4F_API_KEY) {
-      throw new Error("G4F_API_KEY is not configured");
+    // 🔥 UBAH NAMA SECRET KE GEMINI
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured in Supabase Secrets");
     }
 
     // 🎲 RANDOM BIAR HASIL SELALU BEDA
     const randomSeed = Math.floor(Math.random() * 100000);
 
-    // 🔥 PROMPT IDE GASS!
+    // 🔥 PROMPT IDE GASS! (Sama persis seperti milikmu)
     const prompt = `
 Random seed: ${randomSeed}
 
@@ -47,73 +48,35 @@ FORMAT:
 JSON array 20 string tanpa penjelasan
 `;
 
-    // 🚀 CALL G4F API
-    const response = await fetch("https://api.g4f.dev/v1/chat/completions", {
+    // 🚀 CALL GEMINI API
+    const model = "gemini-2.0-flash"; // Bisa diganti ke gemini-1.5-flash jika perlu
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${G4F_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // bisa kamu ganti nanti
-        messages: [
+        contents: [
           {
-            role: "user",
-            content: prompt,
+            parts: [{ text: prompt }],
           },
         ],
+        generationConfig: {
+          // Fitur sakti Gemini biar otomatis mereturn JSON murni tanpa markdown ```json
+          response_mime_type: "application/json",
+          temperature: 0.9, // Ditinggikan sedikit biar ide yang keluar makin absurd/random
+        },
       }),
     });
 
+    const result = await response.json();
+
+    // 🚨 HANDLE ERROR DARI GOOGLE
     if (!response.ok) {
-      const text = await response.text();
-      console.error("G4F error:", text);
-      throw new Error("Failed to fetch from G4F API");
+      console.error("Gemini API Error Detail:", result);
+      throw new Error(result.error?.message || "Failed to fetch from Gemini API");
     }
 
-    const data = await response.json();
-
-    let rawText =
-      data.choices?.[0]?.message?.content || "[]";
-
-    let topics = [];
-
-    // 🔥 CLEAN RESPONSE
-    rawText = rawText
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
-    try {
-      topics = JSON.parse(rawText);
-    } catch (err) {
-      console.error("JSON parse error:", rawText);
-
-      // 🔥 FALLBACK
-      topics = [
-        "Hal kecil apa yang bikin kamu overthinking belakangan ini?",
-        "Kapan terakhir kali kamu ngerasa 'ini gue banget'?",
-        "Kebiasaan aneh yang kamu sembunyiin dari orang lain?",
-        "Menurut kamu kerja sekarang makin capek atau biasa aja?",
-        "Hal random apa yang sering kamu pikirin sebelum tidur?",
-      ];
-    }
-
-    return new Response(JSON.stringify({ topics }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("ERROR:", error);
-
-    return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
-  }
-});
+    // 🔥 AMBIL DATA TEXT
