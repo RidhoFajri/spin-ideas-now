@@ -43,13 +43,14 @@ ATURAN:
 - 5 debat ringan
 - santai, boleh sarkas
 - jangan terlalu formal
+- buat pertanyaan yang akan memberikan sedikit jawaban lebih panjang
 
 FORMAT:
 JSON array 20 string tanpa penjelasan
 `;
 
     // 🚀 CALL GEMINI API
-    const model = "gemini-2.0-flash"; // Bisa diganti ke gemini-1.5-flash jika perlu
+    const model = "gemini-2.5-flash"; // Bisa diganti ke gemini-1.5-flash jika perlu
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
     const response = await fetch(url, {
