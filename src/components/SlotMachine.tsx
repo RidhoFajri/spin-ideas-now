@@ -112,10 +112,11 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
                 <AnimatePresence mode="popLayout">
                   <motion.p
                     key={currentIndex + displayTopic}
-                    initial={spinning ? { y: -40, opacity: 0 } : { scale: 0.8, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1, scale: 1 }}
-                    exit={spinning ? { y: 40, opacity: 0 } : { scale: 0.8, opacity: 0 }}
-                    transition={{ duration: spinning ? 0.05 : 0.4 }}
+                    // 🔥 PERUBAHAN DI SINI: Tambah jarak Y yang lebih jauh & filter blur
+                    initial={spinning ? { y: -60, opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
+                    animate={{ y: 0, opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    exit={spinning ? { y: 60, opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
+                    transition={{ duration: spinning ? 0.08 : 0.4, ease: "linear" }}
                     className={`text-center font-body font-bold text-base md:text-xl leading-tight ${
                       selectedTopic ? "text-primary gold-glow" : "text-foreground"
                     }`}
