@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, RotateCcw } from "lucide-react";
 import { SlotMachine } from "@/components/SlotMachine";
@@ -7,23 +7,66 @@ import { generateTopics } from "@/lib/topics";
 import "@fontsource/press-start-2p";
 
 const Index = () => {
+  // Menyimpan STOK topik (peluru)
   const [topics, setTopics] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Loading ini HANYA true saat website pertama kali dibuka (saat stok benar-benar 0)
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  
+  // State untuk melacak background fetch biar tidak double-request
+  const [isRefilling, setIsRefilling] = useState(false);
+  const isFetchingRef = useRef(false); 
+  
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
-  const loadTopics = useCallback(async () => {
-    setLoading(true);
-    setSelectedTopic(null);
-    const newTopics = await generateTopics();
-    setTopics(newTopics);
-    setLoading(false);
+  // Fungsi untuk mengisi stok peluru diam-diam
+  const fetchMoreTopics = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    
+    isFetchingRef.current = true;
+    setIsRefilling(true);
+
+    try {
+      const newTopics = await generateTopics();
+      
+      setTopics((prev) => {
+        // Gabungkan topik lama dengan yang baru biar stok makin melimpah
+        // Gunakan Set untuk mencegah ada topik duplikat
+        const combined = [...prev, ...newTopics];
+        return Array.from(new Set(combined));
+      });
+    } catch (error) {
+      console.error("Gagal isi ulang topik:", error);
+    } finally {
+      setIsInitialLoading(false);
+      setIsRefilling(false);
+      isFetchingRef.current = false;
+    }
   }, []);
 
+  // Fetch awal saat komponen pertama kali dirender
   useEffect(() => {
-    loadTopics();
-  }, [loadTopics]);
+    fetchMoreTopics();
+  }, [fetchMoreTopics]);
 
-  const handleNewTopic = () => {
+  // Fungsi yang dipanggil ketika SlotMachine selesai muter & milih topik
+  const handleTopicSelected = (topic: string) => {
+    setSelectedTopic(topic);
+
+    // Hapus topik yang sudah dipakai dari stok (biar nggak muncul lagi)
+    setTopics((prev) => {
+      const sisaStok = prev.filter((t) => t !== topic);
+
+      // AUTO RESTOCK: Kalau sisa peluru kurang dari 5, fetch lagi ke Supabase di background!
+      if (sisaStok.length < 5) {
+        fetchMoreTopics();
+      }
+
+      return sisaStok;
+    });
+  };
+
+  const handleBackToSpin = () => {
     setSelectedTopic(null);
   };
 
@@ -57,24 +100,25 @@ const Index = () => {
             <div className="w-full mb-8">
               <SlotMachine
                 topics={topics}
-                onTopicSelected={setSelectedTopic}
-                isLoading={loading}
+                onTopicSelected={handleTopicSelected}
+                // Kirim isLoading=true HANYA di awal. Setelah itu selalu false!
+                isLoading={isInitialLoading} 
               />
             </div>
 
-            {/* Generate New Button */}
+            {/* Generate New Button (Sekarang jadi tombol Restock Manual) */}
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              onClick={loadTopics}
-              disabled={loading}
+              onClick={fetchMoreTopics}
+              disabled={isRefilling}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold text-sm
                 bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80
                 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-              Generate Topik Baru
+              <RefreshCw className={`w-4 h-4 ${isRefilling ? "animate-spin" : ""}`} />
+              {isRefilling ? "Mengisi Peluru..." : `Stok Topik: ${topics.length} (Isi Manual)`}
             </motion.button>
           </motion.div>
         ) : (
@@ -94,7 +138,7 @@ const Index = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              onClick={handleNewTopic}
+              onClick={handleBackToSpin}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold text-sm
                 bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80
                 transition-colors mt-8"
