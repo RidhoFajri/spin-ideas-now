@@ -17,6 +17,15 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutChainRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // 🔥 LOGIKA BARU: Update otomatis saat data topics berubah (Fetch baru)
+  useEffect(() => {
+    // Hanya update jika sedang TIDAK berputar dan ada data topics
+    if (!spinning && topics.length > 0 && !isLoading) {
+      const randomIndex = Math.floor(Math.random() * topics.length);
+      setCurrentIndex(randomIndex);
+    }
+  }, [topics, spinning, isLoading]);
+
   const clearAllTimers = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     timeoutChainRef.current.forEach(clearTimeout);
@@ -98,7 +107,6 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
             />
             <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-16 md:h-20 border-y-2 border-gold/40 pointer-events-none z-10" />
 
-            {/* Container yang di-fix dengan relative & overflow-hidden */}
             <div className="relative h-32 md:h-40 flex items-center justify-center px-4 md:px-8 overflow-hidden">
               {isLoading ? (
                 <div className="flex flex-col items-center gap-3 relative z-20">
@@ -117,7 +125,6 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
                     animate={{ y: "0%", opacity: 1, scale: 1, filter: "blur(0px)" }}
                     exit={spinning ? { y: "100%", opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
                     transition={{ duration: spinning ? 0.08 : 0.4, ease: "linear" }}
-                    // Class absolute w-full untuk mencegah teks dorong-dorongan
                     className={`absolute left-0 right-0 w-full px-4 md:px-8 text-center font-body font-bold text-base md:text-xl leading-tight ${
                       selectedTopic ? "text-primary gold-glow" : "text-foreground"
                     }`}
