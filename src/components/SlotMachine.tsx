@@ -98,9 +98,10 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
             />
             <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-16 md:h-20 border-y-2 border-gold/40 pointer-events-none z-10" />
 
-            <div className="h-32 md:h-40 flex items-center justify-center px-4 md:px-8">
+            {/* Container yang di-fix dengan relative & overflow-hidden */}
+            <div className="relative h-32 md:h-40 flex items-center justify-center px-4 md:px-8 overflow-hidden">
               {isLoading ? (
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 relative z-20">
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -112,12 +113,12 @@ export function SlotMachine({ topics, onTopicSelected, isLoading }: SlotMachineP
                 <AnimatePresence mode="popLayout">
                   <motion.p
                     key={currentIndex + displayTopic}
-                    // 🔥 PERUBAHAN DI SINI: Tambah jarak Y yang lebih jauh & filter blur
-                    initial={spinning ? { y: -60, opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
-                    animate={{ y: 0, opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    exit={spinning ? { y: 60, opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
+                    initial={spinning ? { y: "-100%", opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
+                    animate={{ y: "0%", opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    exit={spinning ? { y: "100%", opacity: 0, filter: "blur(3px)" } : { scale: 0.8, opacity: 0, filter: "blur(0px)" }}
                     transition={{ duration: spinning ? 0.08 : 0.4, ease: "linear" }}
-                    className={`text-center font-body font-bold text-base md:text-xl leading-tight ${
+                    // Class absolute w-full untuk mencegah teks dorong-dorongan
+                    className={`absolute left-0 right-0 w-full px-4 md:px-8 text-center font-body font-bold text-base md:text-xl leading-tight ${
                       selectedTopic ? "text-primary gold-glow" : "text-foreground"
                     }`}
                   >
