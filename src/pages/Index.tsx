@@ -69,7 +69,7 @@ const Index = () => {
           RANDOM TOPIC
         </h1>
         <p className="font-body text-sm md:text-base text-muted-foreground">
-          Tarik tuas, dapatkan topik, mulai diskusi!
+          Rekam, tarik tuas, dapatkan topik, mulai!
         </p>
       </motion.div>
 
@@ -140,7 +140,7 @@ const Index = () => {
       {/* Footer */}
       <div className="mt-auto pt-12">
         <p className="font-display text-[8px] text-muted-foreground/40">
-          ★ GOOD LUCK ★
+          ★ SEMUA TOPIK/PERTANYAAN MILIK ALLAH ★
         </p>
       </div>
     </div>
