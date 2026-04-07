@@ -7,19 +7,14 @@ import { generateTopics } from "@/lib/topics";
 import "@fontsource/press-start-2p";
 
 const Index = () => {
-  // Menyimpan STOK topik (peluru)
   const [topics, setTopics] = useState<string[]>([]);
-  
-  // Loading ini HANYA true saat website pertama kali dibuka (saat stok benar-benar 0)
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   
-  // State untuk melacak background fetch biar tidak double-request
   const [isRefilling, setIsRefilling] = useState(false);
   const isFetchingRef = useRef(false); 
   
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
 
-  // Fungsi untuk mengisi stok peluru diam-diam
   const fetchMoreTopics = useCallback(async () => {
     if (isFetchingRef.current) return;
     
@@ -28,15 +23,12 @@ const Index = () => {
 
     try {
       const newTopics = await generateTopics();
-      
       setTopics((prev) => {
-        // Gabungkan topik lama dengan yang baru biar stok makin melimpah
-        // Gunakan Set untuk mencegah ada topik duplikat
         const combined = [...prev, ...newTopics];
         return Array.from(new Set(combined));
       });
     } catch (error) {
-      console.error("Gagal isi ulang topik:", error);
+      console.error("Gagal generate topik:", error);
     } finally {
       setIsInitialLoading(false);
       setIsRefilling(false);
@@ -44,24 +36,19 @@ const Index = () => {
     }
   }, []);
 
-  // Fetch awal saat komponen pertama kali dirender
   useEffect(() => {
     fetchMoreTopics();
   }, [fetchMoreTopics]);
 
-  // Fungsi yang dipanggil ketika SlotMachine selesai muter & milih topik
   const handleTopicSelected = (topic: string) => {
     setSelectedTopic(topic);
 
-    // Hapus topik yang sudah dipakai dari stok (biar nggak muncul lagi)
     setTopics((prev) => {
       const sisaStok = prev.filter((t) => t !== topic);
-
-      // AUTO RESTOCK: Kalau sisa peluru kurang dari 5, fetch lagi ke Supabase di background!
+      // Auto-fetch berjalan diam-diam tanpa mengubah UI
       if (sisaStok.length < 5) {
         fetchMoreTopics();
       }
-
       return sisaStok;
     });
   };
@@ -101,12 +88,11 @@ const Index = () => {
               <SlotMachine
                 topics={topics}
                 onTopicSelected={handleTopicSelected}
-                // Kirim isLoading=true HANYA di awal. Setelah itu selalu false!
                 isLoading={isInitialLoading} 
               />
             </div>
 
-            {/* Generate New Button (Sekarang jadi tombol Restock Manual) */}
+            {/* Generate New Button (Ilusi UI terjaga!) */}
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -118,7 +104,8 @@ const Index = () => {
                 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${isRefilling ? "animate-spin" : ""}`} />
-              {isRefilling ? "Mengisi Peluru..." : `Stok Topik: ${topics.length} (Isi Manual)`}
+              {/* Teks diubah agar user merasa ini selalu generate dari awal */}
+              {isRefilling ? "Generating Topik..." : "Generate Topik Baru"}
             </motion.button>
           </motion.div>
         ) : (
